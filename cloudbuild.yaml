@@ -38,3 +38,5 @@ substitutions:
   _DB_PORT: "5432"
   _DB_USER: "postgres"
   _DB_PASSWORD: projects/314114786102/secrets/simple-api-db-pass/versions/latest
+options:
+  logging: CLOUD_LOGGING_ONLY
