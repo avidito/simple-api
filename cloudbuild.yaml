@@ -1,0 +1,40 @@
+steps:
+  # Build the container image
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY_AR}/${_IMAGE}:latest
+      - ${_SOURCE}
+  # Push the container image to Artifact Registry
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY_AR}/${_IMAGE}:latest
+  # Deploy container image to Cloud Run
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - run
+      - deploy
+      - ${_CR_NAME}
+      - --image=${_LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY_AR}/${_IMAGE}:latest
+      - --region=asia-southeast2
+      - --platform=managed
+      - --timeout=3600
+      - --set-env-vars=DB_HOST=${_DB_HOST}
+      - --set-env-vars=DB_PORT=${_DB_PORT}
+      - --set-env-vars=DB_USER=${_DB_USER}
+      - --update-secrets=DB_PASSWORD=${_DB_PASSWORD}
+      - --allow-unauthenticated
+images:
+  - ${_LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY_AR}/${_IMAGE}:latest
+substitutions:
+  _SOURCE: .
+  _PROJECT_ID: noel-lyn-dev
+  _LOCATION: asia
+  _REPOSITORY_AR: asia.gcr.io
+  _IMAGE: simple-api
+  _DB_HOST: "34.50.84.193"
+  _DB_PORT: "5432"
+  _DB_USER: "postgres"
+  _DB_PASSWORD: projects/314114786102/secrets/simple-api-db-pass/versions/latest
